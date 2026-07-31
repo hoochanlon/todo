@@ -158,7 +158,8 @@
                             <template>
                                 <div>
                                     <div v-if="!isEditing" @dblclick="editText" class="bar-message-text">
-                                        {{ slogan }}
+                                        <span v-if="intention === 'removed'" @click="clearRecycleBin">Click to empty trash</span>
+                                        <template v-else>{{ slogan }}</template>
                                     </div>
                                     <div v-else="v-else">
                                         <input
@@ -226,17 +227,28 @@
                                         alt="Mark as Incomplete"
                                         class="icon-finish" draggable="false">
                                 </div>
-                                <div
-                                    v-if="todo.removed"
-                                    class="todo-btn btn-restore"
-                                    @click="restoreTodo(todo)">
-                                    <img
-                                        src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMTkiIHZpZXdCb3g9IjAgMCAxOSAxOSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTcuMzQ3OTggMi42NTc5MkM3LjcxMTM0IDEuOTEzNDQgNy40MDIzOCAxLjAxNTM1IDYuNjU3OSAwLjY1MTk4OEM1LjkxMzQxIDAuMjg4NjI3IDUuMDE1MzIgMC41OTc1OSA0LjY1MTk2IDEuMzQyMDhMNy4zNDc5OCAyLjY1NzkyWk0xLjUyNiA5LjA4MzMzTDAuMzc1NTcxIDguMTIwNzhDMC4wNzc5NTE2IDguNDc2NDkgLTAuMDM4MzgyIDguOTQ5ODcgMC4wNjA0NjEyIDkuNDAzMDFDMC4xNTkzMDQgOS44NTYxNSAwLjQ2MjIwNiAxMC4yMzgxIDAuODgwOTI0IDEwLjQzNzVMMS41MjYgOS4wODMzM1pNMTQuNTcyNCAxNi41ODkzQzE0LjM0NTYgMTcuMzg2IDE0LjgwNzYgMTguMjE1OCAxNS42MDQ0IDE4LjQ0MjZDMTYuNDAxMiAxOC42Njk0IDE3LjIzMSAxOC4yMDczIDE3LjQ1NzggMTcuNDEwNkwxNC41NzI0IDE2LjU4OTNaTTYuMjUxOTIgMTQuMzMyMUM2LjcxMTQ1IDE1LjAyMTMgNy42NDI3NiAxNS4yMDc2IDguMzMyMDUgMTQuNzQ4MUM5LjAyMTM0IDE0LjI4ODUgOS4yMDc2IDEzLjM1NzIgOC43NDgwOCAxMi42Njc5TDYuMjUxOTIgMTQuMzMyMVpNNC42NTE5NiAxLjM0MjA4QzMuNjc2NiAzLjM0MDQ3IDIuNjAwMzMgNS4wNDUyNSAxLjc2NjU4IDYuMjUxMDhDMS4zNTA1OSA2Ljg1MjcyIDAuOTk3MjYzIDcuMzI2ODUgMC43NTAzODQgNy42NDc2MkMwLjYyNzAwNSA3LjgwNzkzIDAuNTMwMzkyIDcuOTI5NyAwLjQ2NjA0NyA4LjAwOTY5QzAuNDMzODggOC4wNDk2NyAwLjQwOTc5NiA4LjA3OTIgMC4zOTQ0ODIgOC4wOTc4NkMwLjM4NjgyNiA4LjEwNzE4IDAuMzgxMzY0IDguMTEzNzkgMC4zNzgxODMgOC4xMTc2M0MwLjM3NjU5MiA4LjExOTU1IDAuMzc1NTcyIDguMTIwNzcgMC4zNzUxMzMgOC4xMjEzQzAuMzc0OTE0IDguMTIxNTcgMC4zNzQ4NCA4LjEyMTY1IDAuMzc0OTEyIDguMTIxNTdDMC4zNzQ5NDggOC4xMjE1MiAwLjM3NTAyMSA4LjEyMTQ0IDAuMzc1MTMxIDguMTIxM0MwLjM3NTE4NiA4LjEyMTI0IDAuMzc1Mjk2IDguMTIxMTEgMC4zNzUzMjMgOC4xMjEwN0MwLjM3NTQ0MiA4LjEyMDkzIDAuMzc1NTcxIDguMTIwNzggMS41MjYgOS4wODMzM0MyLjY3NjQzIDEwLjA0NTkgMi42NzY1OCAxMC4wNDU3IDIuNjc2NzMgMTAuMDQ1NUMyLjY3NjggMTAuMDQ1NCAyLjY3Njk2IDEwLjA0NTIgMi42NzcwOSAxMC4wNDUxQzIuNjc3MzUgMTAuMDQ0OCAyLjY3NzY1IDEwLjA0NDQgMi42Nzc5OCAxMC4wNDRDMi42Nzg2NSAxMC4wNDMyIDIuNjc5NDYgMTAuMDQyMyAyLjY4MDQyIDEwLjA0MTFDMi42ODIzNCAxMC4wMzg4IDIuNjg0ODYgMTAuMDM1OCAyLjY4Nzk0IDEwLjAzMkMyLjY5NDEyIDEwLjAyNDYgMi43MDI2MSAxMC4wMTQzIDIuNzEzMzMgMTAuMDAxM0MyLjczNDc1IDkuOTc1MTYgMi43NjUwOCA5LjkzNzk1IDIuODAzNjIgOS44OTAwNUMyLjg4MDY3IDkuNzk0MjYgMi45OTA2IDkuNjU1NjEgMy4xMjc3OCA5LjQ3NzM4QzMuNDAyMDEgOS4xMjEwNiAzLjc4NTg3IDguNjA1NjIgNC4yMzQxNyA3Ljk1NzI1QzUuMTI5IDYuNjYzMDggNi4yODk3MiA0LjgyNjIgNy4zNDc5OCAyLjY1NzkyTDQuNjUxOTYgMS4zNDIwOFpNMi4wNDcwNCAxMC40ODk5QzMuNzc2MTcgOS44NDk0MiA1LjczMzE5IDkuMTcyMzEgNy42MzggOC43MjEzN0M5LjU3MDA4IDguMjYzOTkgMTEuMzAyNSA4LjA3NjMxIDEyLjYyODggOC4zMDE3QzEzLjg3NTIgOC41MTM1MiAxNC42Mjg0IDkuMDUwMDggMTUuMDE2MyAxMC4wNDA1QzE1LjQ2MjggMTEuMTgwNyAxNS41MzgzIDEzLjE5NTYgMTQuNTcyNCAxNi41ODkzTDE3LjQ1NzggMTcuNDEwNkMxOC40ODQzIDEzLjgwNDIgMTguNjE2NiAxMS4wMDY3IDE3LjgwOTcgOC45NDY0NkMxNi45NDQyIDYuNzM2MzQgMTUuMTMzNyA1LjY4NDM3IDEzLjEzMTQgNS4zNDQxMUMxMS4yMDkyIDUuMDE3NDMgOS4wMDc5OSA1LjMxNDEzIDYuOTQ2OSA1LjgwMjA2QzQuODU4NTYgNi4yOTY0NCAyLjc2MjgzIDcuMDI1NTggMS4wMDQ5NiA3LjY3NjczTDIuMDQ3MDQgMTAuNDg5OVpNOC43NDgwOCAxMi42Njc5QzcuNTIzMTIgMTAuODMwNSA1LjIyOTM0IDkuMTg1OTMgMi4xNzEwOCA3LjcyOTEzTDAuODgwOTI0IDEwLjQzNzVDMy43NzA2NiAxMS44MTQxIDUuNDc2ODggMTMuMTY5NSA2LjI1MTkyIDE0LjMzMjFMOC43NDgwOCAxMi42Njc5WiIgZmlsbD0iIzMzMzIyRSIvPgo8L3N2Zz4K"
-                                        alt="Restore" draggable="false">
+                                <!-- Restore and Delete buttons container -->
+                                <div v-if="todo.removed">
+                                    <div
+                                        class="todo-btn btn-restore"
+                                        @click="restoreTodo(todo)">
+                                        <img
+                                            src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMTkiIHZpZXdCb3g9IjAgMCAxOSAxOSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTcuMzQ3OTggMi42NTc5MkM3LjcxMTM0IDEuOTEzNDQgNy40MDIzOCAxLjAxNTM1IDYuNjU3OSAwLjY1MTk4OEM1LjkxMzQxIDAuMjg4NjI3IDUuMDE1MzIgMC41OTc1OSA0LjY1MTk2IDEuMzQyMDhMNy4zNDc5OCAyLjY1NzkyWk0xLjUyNiA5LjA4MzMzTDAuMzc1NTcxIDguMTIwNzhDMC4wNzc5NTE2IDguNDc2NDkgLTAuMDM4MzgyIDguOTQ5ODcgMC4wNjA0NjEyIDkuNDAzMDFDMC4xNTkzMDQgOS44NTYxNSAwLjQ2MjIwNiAxMC4yMzgxIDAuODgwOTI0IDEwLjQzNzVMMS41MjYgOS4wODMzM1pNMTQuNTcyNCAxNi41ODkzQzE0LjM0NTYgMTcuMzg2IDE0LjgwNzYgMTguMjE1OCAxNS42MDQ0IDE4LjQ0MjZDMTYuNDAxMiAxOC42Njk0IDE3LjIzMSAxOC4yMDczIDE3LjQ1NzggMTcuNDEwNkwxNC41NzI0IDE2LjU4OTNaTTYuMjUxOTIgMTQuMzMyMUM2LjcxMTQ1IDE1LjAyMTMgNy42NDI3NiAxNS4yMDc2IDguMzMyMDUgMTQuNzQ4MUM5LjAyMTM0IDE0LjI4ODUgOS4yMDc2IDEzLjM1NzIgOC43NDgwOCAxMi42Njc5TDYuMjUxOTIgMTQuMzMyMVpNNC42NTE5NiAxLjM0MjA4QzMuNjc2NiAzLjM0MDQ3IDIuNjAwMzMgNS4wNDUyNSAxLjc2NjU4IDYuMjUxMDhDMS4zNTA1OSA2Ljg1MjcyIDAuOTk3MjYzIDcuMzI2ODUgMC43NTAzODQgNy42NDc2MkMwLjYyNzAwNSA3LjgwNzkzIDAuNTMwMzkyIDcuOTI5NyAwLjQ2NjA0NyA4LjAwOTY5QzAuNDMzODggOC4wNDk2NyAwLjQwOTc5NiA4LjA3OTIgMC4zOTQ0ODIgOC4wOTc4NkMwLjM4NjgyNiA4LjEwNzE4IDAuMzgxMzY0IDguMTEzNzkgMC4zNzgxODMgOC4xMTc2M0MwLjM3NjU5MiA4LjExOTU1IDAuMzc1NTcyIDguMTIwNzcgMC4zNzUxMzMgOC4xMjEzQzAuMzc0OTE0IDguMTIxNTcgMC4zNzQ4NCA4LjEyMTY1IDAuMzc0OTEyIDguMTIxNTdDMC4zNzQ5NDggOC4xMjE1MiAwLjM3NTAyMSA4LjEyMTQ0IDAuMzc1MTMxIDguMTIxM0MwLjM3NTE4NiA4LjEyMTI0IDAuMzc1Mjk2IDguMTIxMTEgMC4zNzUzMjMgOC4xMjEwN0MwLjM3NTQ0MiA4LjEyMDkzIDAuMzc1NTcxIDguMTIwNzggMS41MjYgOS4wODMzM0MyLjY3NjQzIDEwLjA0NTkgMi42NzY1OCAxMC4wNDU3IDIuNjc2NzMgMTAuMDQ1NUMyLjY3NjggMTAuMDQ1NCAyLjY3Njk2IDEwLjA0NTIgMi42NzcwOSAxMC4wNDUxQzIuNjc3MzUgMTAuMDQ0OCAyLjY3NzY1IDEwLjA0NDQgMi42Nzc5OCAxMC4wNDRDMi42Nzg2NSAxMC4wNDMyIDIuNjc5NDYgMTAuMDQyMyAyLjY4MDQyIDEwLjA0MTFDMi42ODIzNCAxMC4wMzg4IDIuNjg0ODYgMTAuMDM1OCAyLjY4Nzk0IDEwLjAzMkMyLjY5NDEyIDEwLjAyNDYgMi43MDI2MSAxMC4wMTQzIDIuNzEzMzMgMTAuMDAxM0MyLjczNDc1IDkuOTc1MTYgMi43NjUwOCA5LjkzNzk1IDIuODAzNjIgOS44OTAwNUMyLjg4MDY3IDkuNzk0MjYgMi45OTA2IDkuNjU1NjEgMy4xMjc3OCA5LjQ3NzM4QzMuNDAyMDEgOS4xMjEwNiAzLjc4NTg3IDguNjA1NjIgNC4yMzQxNyA3Ljk1NzI1QzUuMTI5IDYuNjYzMDggNi4yODk3MiA0LjgyNjIgNy4zNDc5OCAyLjY1NzkyTDQuNjUxOTYgMS4zNDIwOFpNMi4wNDcwNCAxMC40ODk5QzMuNzc2MTcgOS44NDk0MiA1LjczMzE5IDkuMTcyMzEgNy42MzggOC43MjEzN0M5LjU3MDA4IDguMjYzOTkgMTEuMzAyNSA4LjA3NjMxIDEyLjYyODggOC4zMDE3QzEzLjg3NTIgOC41MTM1MiAxNC42Mjg0IDkuMDUwMDggMTUuMDE2MyAxMC4wNDA1QzE1LjQ2MjggMTEuMTgwNyAxNS41MzgzIDEzLjE5NTYgMTQuNTcyNCAxNi41ODkzTDE3LjQ1NzggMTcuNDEwNkMxOC40ODQzIDEzLjgwNDIgMTguNjE2NiAxMS4wMDY3IDE3LjgwOTcgOC45NDY0NkMxNi45NDQyIDYuNzM2MzQgMTUuMTMzNyA1LjY4NDM3IDEzLjEzMTQgNS4zNDQxMUMxMS4yMDkyIDUuMDE3NDMgOS4wMDc5OSA1LjMxNDEzIDYuOTQ2OSA1LjgwMjA2QzQuODU4NTYgNi4yOTY0NCAyLjc2MjgzIDcuMDI1NTggMS4wMDQ5NiA3LjY3NjczTDIuMDQ3MDQgMTAuNDg5OVpNOC43NDgwOCAxMi42Njc5QzcuNTIzMTIgMTAuODMwNSA1LjIyOTM0IDkuMTg1OTMgMi4xNzEwOCA3LjcyOTEzTDAuODgwOTI0IDEwLjQzNzVDMy43NzA2NiAxMS44MTQxIDUuNDc2ODggMTMuMTY5NSA2LjI1MTkyIDE0LjMzMjFMOC43NDgwOCAxMi42Njc5WiIgZmlsbD0iIzMzMzIyRSIvPgo8L3N2Zz4K"
+                                            alt="Restore" draggable="false">
+                                    </div>
+                                    <!-- Permanently Delete -->
+                                    <div
+                                        class="todo-btn btn-permanent-delete"
+                                        style="right: 50px; top: 16px; height: 30px; width: 30px; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;"
+                                        @click="permanentlyDelete(todo)">
+                                        <img
+                                            src="public/img/delete.svg"
+                                            alt="Delete Permanently" style="width: 16px; height: 16px;" draggable="false">
+                                    </div>
                                 </div>
                                 <div
                                     class="todo-btn btn-delete"
-                                    v-else="todo.removed"
+                                    v-else
                                     @click="removeTodo(todo)">
                                     <img
                                         src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNS4wOTkzIDE3Ljc1OTdDMTUuNzk0OSAxOC4yMDk4IDE2LjcyMzUgMTguMDEwOCAxNy4xNzM2IDE3LjMxNTJDMTcuNjIzNiAxNi42MTk3IDE3LjQyNDYgMTUuNjkxMSAxNi43MjkxIDE1LjI0MUMxMy4zMDc5IDEzLjAyNzMgMTAuODIwOSAxMC45OTU5IDguOTIyNTEgOS4wMzczOUM5LjA5NzQyIDguODQ5ODIgOS4yNzI5MSA4LjY2NTcxIDkuNDQ4ODggOC40ODUzNEMxMS44ODY0IDUuOTg2OTIgMTQuMjQ3MiA0LjM4MDY2IDE2LjI5NDQgMy45NzEyMkMxNy4xMDY3IDMuODA4NzUgMTcuNjMzNSAzLjAxODUyIDE3LjQ3MTEgMi4yMDYxOEMxNy4zMDg2IDEuMzkzODQgMTYuNTE4NCAwLjg2NzAxMyAxNS43MDYgMS4wMjk0OEMxMi43NTMyIDEuNjIwMDUgOS44NjQwNiAzLjc2Mzc5IDcuMzAxNTQgNi4zOTAzN0M3LjE4MTUxIDYuNTEzNCA3LjA2MTgxIDYuNjM3ODkgNi45NDI0OSA2Ljc2Mzc1QzUuNDIwMDEgNC44MDQzMyA0LjM3MDU4IDIuODc2MzIgMy40MjU5MSAwLjg2MzE2NEMzLjA3Mzk5IDAuMTEzMjAyIDIuMTgwNzMgLTAuMjA5NDc1IDEuNDMwNzcgMC4xNDI0NDVDMC42ODA4MDkgMC40OTQzNjUgMC4zNTgxMzIgMS4zODc2MiAwLjcxMDA1MSAyLjEzNzU4QzEuODIwODggNC41MDQ4MSAzLjA3ODk5IDYuNzY1MTEgNC45MjkzMiA5LjA1MzA2QzMuMjIyMDYgMTEuMTM0MSAxLjYyNjY5IDEzLjQzMjggMC4yMjI3MjMgMTUuNzE0MkMtMC4yMTE0NTMgMTYuNDE5NyAwLjAwODUyNzUyIDE3LjM0MzcgMC43MTQwNjQgMTcuNzc3OEMxLjQxOTYgMTguMjEyIDIuMzQzNTIgMTcuOTkyIDIuNzc3NyAxNy4yODY1QzQuMDQ4MTkgMTUuMjIyIDUuNDY0MDUgMTMuMTcyNiA2Ljk1NTU5IDExLjMxNjhDOC45ODUgMTMuMzc2NSAxMS41OTU5IDE1LjQ5MjggMTUuMDk5MyAxNy43NTk3WiIgZmlsbD0iIzMzMzIyRSIvPgo8L3N2Zz4K"
@@ -265,7 +277,7 @@
                                 </div>
                             </li>
                         </transition-group>
-                        <div class="bar-message bar-bottom">
+                        <div class="bar-message bar-bottom" v-if="todos.length">
                             <div class="bar-message-text">
                                 <span v-if="leftTodosCount">{{leftTodosCount}} items remaining</span>
                                 <span v-else-if="completedTodosCount">All completed, good job!</span>
@@ -373,7 +385,7 @@
                 <!-- Custom Info -->
                 <div class="nav">
                     <div class="github">
-                        <a href="https://github.com/ricocc/uiineed-todo-list?ref=opensource-todo" target="_blank" class="social-link" draggable="false">
+                        <a href="https://github.com/hoochanlon/todo" target="_blank" class="social-link" draggable="false">
                             <img src="public/img/social/github.svg" class="ic-social" alt="" draggable="false">
                         </a>
                     </div>
@@ -386,43 +398,43 @@
                                 About
                             </div>
                             <div class="popup animated popIn" v-if="!popShow">
-                                <div class="author">
-                                    <img src="public/img/author.jpg" alt="">
-                                    RicoCC
-                                </div>
+                                <!-- Author 1: Rico -->
+                                <a href="https://ricoui.com/?ref=todo" class="author" target="_blank" style="text-decoration: none;">
+                                    <img src="public/img/author-1.jpg" alt="">
+                                    ricocc
+                                </a>
                                 <div class="author-info">
                                     <div class="author-desc">
-                                        A simple one who loves design and code.
+                                        Original author
                                     </div>
                                 </div>
                                 <div class="social">
-                                    <a href="https://x.com/ricouii" target="_blank" class="social-link">
-                                        <img src="public/img/social/x.svg" class="ic-social" alt="">
-                                    </a>
                                     <a href="https://github.com/ricocc/uiineed-todo-list" target="_blank" class="social-link" draggable="false">
                                         <img src="public/img/social/github.svg" class="ic-social" alt="" draggable="false">
                                     </a>
                                     <a href="mailto:ricocc@qq.com" class="social-link">
                                         <img src="public/img/social/mail.svg" class="ic-social" alt="">
                                     </a>
-                                    <a
-                                        href="https://www.xiaohongshu.com/user/profile/5f2b6903000000000101f51f"
-                                        target="_blank"
-                                        class="social-link">
-                                        <img src="public/img/social/xiaohongshu.svg" class="ic-social" alt="">
-                                    </a>
-
-                                    <a
-                                        href="https://dribbble.com/rrrricocc"
-                                        target="_blank"
-                                        class="social-link">
-                                        <img src="public/img/social/dribbble.svg" class="ic-social" alt="">
-                                    </a>
-
                                 </div>
 
-                                <a href="https://ricoui.com/?ref=todo" target="_blank" class="inspiration">🔖Rico's Blog↗
+                                <!-- Author 2: hoochanlon -->
+                                <a href="https://github.com/hoochanlon" class="author" target="_blank" style="text-decoration: none; margin-top: 20px;">
+                                    <img src="public/img/author-2.png" alt="">
+                                    <span style="transform: translateY(-4px);">hoochanlon</span>
                                 </a>
+                                <div class="author-info">
+                                    <div class="author-desc">
+                                        Contributor
+                                    </div>
+                                </div>
+                                <div class="social">
+                                    <a href="https://github.com/hoochanlon" target="_blank" class="social-link" draggable="false">
+                                        <img src="public/img/social/github.svg" class="ic-social" alt="" draggable="false">
+                                    </a>
+                                    <a href="mailto:hoochanlon@outlook.com" class="social-link">
+                                        <img src="public/img/social/mail.svg" class="ic-social" alt="">
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div> 
@@ -440,6 +452,7 @@
         <script>
             // localStorage operations
             var STORAGE_KEY = 'uiineed-todos';
+            var RECYCLE_BIN_KEY = 'uiineed-recycle-bin';
             var todoStorage = {
                 fetch: function() {
                     var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -449,8 +462,14 @@
                     todoStorage.uid = todos.length;
                     return todos;
                 },
+                fetchRecycleBin: function() {
+                    return JSON.parse(localStorage.getItem(RECYCLE_BIN_KEY) || '[]');
+                },
                 save: function(todos) {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+                },
+                saveRecycleBin: function(recycleBin) {
+                    localStorage.setItem(RECYCLE_BIN_KEY, JSON.stringify(recycleBin));
                 }
             }
         </script>
@@ -465,7 +484,7 @@
                         editedTodo: null,
                         intention: 'all', // Default: all
                         checkEmpty: false,
-                        recycleBin: [],
+                        recycleBin: todoStorage.fetchRecycleBin(),
                         dragIndex: '',
                         enterIndex: '',
                         show: true,
@@ -486,6 +505,12 @@
                     todos: {
                         handler: function(todos) {
                             todoStorage.save(todos);
+                        },
+                        deep: true
+                    },
+                    recycleBin: {
+                        handler: function(recycleBin) {
+                            todoStorage.saveRecycleBin(recycleBin);
                         },
                         deep: true
                     }
@@ -570,6 +595,23 @@
                         this.todos.unshift(todo);
                         let pos = this.recycleBin.indexOf(todo);
                         this.recycleBin.splice(pos, 1);
+                    },
+                    permanentlyDelete: function(todo) {
+                        confirm('Are you sure you want to permanently delete this item? This action cannot be undone!').then((confirmed) => {
+                            if (confirmed) {
+                                let pos = this.recycleBin.indexOf(todo);
+                                this.recycleBin.splice(pos, 1);
+                            }
+                        });
+                    },
+                    clearRecycleBin: function() {
+                        if (!this.recycleBin.length) return;
+                        confirm('Are you sure you want to empty the trash? This action cannot be undone!').then((confirmed) => {
+                            if (confirmed) {
+                                this.recycleBin = [];
+                                this.intention = 'all';
+                            }
+                        });
                     },
                     editdTodo: function(todo) {
                         this.editedTodo = {
