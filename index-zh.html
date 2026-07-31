@@ -18,7 +18,10 @@
         const languageCode = browserLanguage.split('-')[0].toLowerCase();
         if (!localStorage.getItem('uiineed-todos-lang')) localStorage.setItem('uiineed-todos-lang', languageCode);
         const userLanguage = localStorage.getItem('uiineed-todos-lang');
-        if (userLanguage && userLanguage !== "zh") window.location.href = (window.location.pathname === "/") ? 'index.html' : window.location.href.replace('index-zh.html', 'index.html');
+        if (userLanguage !== 'zh') {
+            const targetUrl = new URL('index.html', window.location.href);
+            if (targetUrl.href !== window.location.href) window.location.href = targetUrl.href;
+        }
     </script>
     <script>
         // 保存原生alert备用
